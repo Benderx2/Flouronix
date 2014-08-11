@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stddef.h>
 #include <klib/kassert.h>
 #include <klib/kbool.h>
 #include <klib/string.h>

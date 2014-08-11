@@ -1,8 +1,9 @@
 #ifndef _K_STRING_H
 #define _K_STRING_H
-#define NULL 0
+//#define NULL 0
+#include <stddef.h>
 #include <klib/kbool.h>
-typedef unsigned int size_t;
+//typedef unsigned int size_t;
 void* memcpy(void* s1, void* s2, size_t n);
 void* memmove(void* s1, void* s2, size_t n);
 char* strcpy(char* s1, char* s2);
