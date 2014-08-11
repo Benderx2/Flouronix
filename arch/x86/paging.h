@@ -4,20 +4,24 @@
 #include <klib/kbool.h>
 #include <arch/x86/x86.h>
 #include <stdint.h>
+#define PAGE_SIZE 0x400000
 #define NUMBER_OF_PT_ENTRIES 1024
-typedef struct sPage {
-	uint32_t present : 1; // Is this page present in memory?
-	uint32_t rw : 1; // Read / Write Bit
-	uint32_t dpl : 1; // Kernel or User?
-	uint32_t p_access : 1; // Page Accessed since last refresh
-	uint32_t p_write : 1; // Page written to since last refresh	
-	uint32_t reserved : 7; // Reserved
-	uint32_t frame : 20; // 20-bits for page frame
-} page_t;
+#define I86_PAGE_WRITEABLE 0x2
+#define I86_PAGE_PRESENT 0x1
+#define I86_PAGE_4MB 0x80
+#define I86_PAGE_USER 0x4
+typedef uint32_t page_t;
 typedef struct sPage_dir {
 	page_t pages[NUMBER_OF_PT_ENTRIES];
 	uint32_t physaddr;
 } page_dir_t;
 extern uint32_t k_page_dir_addr;
-void map_page_kernel(uint32_t addr);
+void map_page_kernel(uint32_t vaddr, uint32_t paddr);
+void switch_page_directory(uint32_t page_dir_addr);
+void map_page(uint32_t vaddr, uint32_t paddr, bool is_user, page_dir_t* page_dir);
+void map_kernel_to_addr_space(page_dir_t* page_dir);
+void initialise_paging(int total_mem);
+uint32_t alloc_frame(void);
+void free_frame(uint32_t);
+int get_physaddr(int vaddr);
 #endif

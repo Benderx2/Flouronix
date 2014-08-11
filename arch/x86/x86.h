@@ -1,7 +1,7 @@
 #ifndef __X86_H
 #define __X86_H
-#define INDEX_FROM_BIT(a) (a/(8*4))
-#define OFFSET_FROM_BIT(a) (a%(8*4))
+#include <klib/kbool.h>
+#include <arch/x86/paging.h>
 #define PAGE_ALIGN 4096
 #define PHYSICAL_TO_VIRTUAL(a) (a + 0xC0000000)
 #include <stdint.h>
@@ -43,6 +43,11 @@ typedef struct sCPUx86 {
 	void (*SetIRQHandler)(uint8_t n, isr_t handler);
 	// Pagin'
 	void (*invlpg)(void* m);
+	uint32_t (*AllocatePageFrame)(void);
+	void (*FreePageFrame)(uint32_t);
+	void (*MapKernelPage)(uint32_t, uint32_t);
+	void (*MapPage)(uint32_t, uint32_t, bool, page_dir_t*);
+	void (*MapKerneltoAddressSpace)(page_dir_t*);
 } CPUx86_t;
 uint8_t inportb(uint16_t);
 void outportb(uint16_t  port, uint8_t value);

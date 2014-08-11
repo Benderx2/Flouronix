@@ -149,8 +149,8 @@ global k_page_dir
 k_page_dir:
     dd 0x00000083
     times (KERNEL_PAGE_NUMBER - 1) dd 0                 
-    times 4 dd 0x00000083
-    times (1024 - KERNEL_PAGE_NUMBER - 4) dd 0
+    dd 0x00000083
+    times (1024 - KERNEL_PAGE_NUMBER - 1) dd 0
     dd k_page_dir - KERNEL_VIRTUAL_BASE
 [SECTION .bss]
 ; Kernel Stack

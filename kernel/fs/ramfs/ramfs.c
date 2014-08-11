@@ -14,7 +14,7 @@ void initialise_ramfs(uint32_t ramfs_location)
 	file_headers = (ramfs_file_header*)(ramfs_location + sizeof(ramfs_header));
 	ramfs_units = (FS_Unit*)kmalloc(header->nFiles);
 	FS_Device* ramfs_dev = (FS_Device*)KernelHeap.Alloc(sizeof(FS_Device));
-	strcpy(ramfs_dev->name, "ramfs");
+	strcpy(ramfs_dev->name, "ramfs.0");
 	ramfs_dev->fopen = &ramfs_fopen;
 	ramfs_dev->read = &ramfs_read;
 	KernelVFS.MountDevice(ramfs_dev);

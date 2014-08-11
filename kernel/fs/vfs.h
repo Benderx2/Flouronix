@@ -9,7 +9,6 @@ typedef struct sFS_unit {
 	char name[128];
 	int group_id;
 	int user_id;
-	int E_ACESS; 	
  	/** The Index of the parent directory **/
 	uint32_t parent_index;
 	/** Flags - Directory, File, Mountpoint, root etc. **/
