@@ -36,6 +36,9 @@ typedef struct sCPUx86 {
 	void (*DivideByZeroException)(registers_t regs);
 	void (*SIMDFloatingPointException)(registers_t regs);
 	void (*OverflowException)(registers_t regs);
+	void (*InvalidTSSException)(registers_t regs);
+	void (*DoubleFaultException)(registers_t regs);
+	void (*SegmentNotPresent)(registers_t regs);
 	// Interrupt related stuff...
 	void (*SetInterruptDescriptorEntry)(uint8_t num, uint32_t base, uint16_t sel, uint8_t flags);
 	void (*FlushInterruptTable)(uint32_t);
@@ -48,6 +51,7 @@ typedef struct sCPUx86 {
 	void (*MapKernelPage)(uint32_t, uint32_t);
 	void (*MapPage)(uint32_t, uint32_t, bool, page_dir_t*);
 	void (*MapKerneltoAddressSpace)(page_dir_t*);
+	void (*SwitchAddressSpace)(uint32_t);
 } CPUx86_t;
 uint8_t inportb(uint16_t);
 void outportb(uint16_t  port, uint8_t value);

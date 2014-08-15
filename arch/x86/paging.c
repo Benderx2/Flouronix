@@ -87,13 +87,22 @@ void initialise_paging(int total_mem)
 	CPU_x86.MapKernelPage = &map_page_kernel;
 	CPU_x86.MapPage = &map_page;
 	CPU_x86.MapKerneltoAddressSpace = &map_kernel_to_addr_space;
+	CPU_x86.SwitchAddressSpace = &switch_page_directory;
 }
+void print_first_k_entry(void)
+{
+	page_dir_t* k_page_dir = (page_dir_t*)(k_page_dir_addr);
+	Console.WriteLine("First Entry in Kernel Page Directory: %x\n", k_page_dir->pages[0]);
+}
+
 void map_page_kernel(uint32_t paddr, uint32_t vaddr)
 {	
+	set_frame(paddr); // Is mapped.
 	Console.WriteLine("Mapping page, Physical Address: %x, Virtual Address : %x, Page : %x\n", paddr, vaddr, paddr | I86_PAGE_PRESENT | I86_PAGE_WRITEABLE | I86_PAGE_4MB);
 	k_page_dir = (page_dir_t*)(k_page_dir_addr);
 	uint32_t offset = vaddr >> 22;
 	k_page_dir->pages[offset] = paddr | I86_PAGE_PRESENT | I86_PAGE_WRITEABLE | I86_PAGE_4MB;
+	Console.WriteLine("Going to switch_page_directory CR3: %x\n", k_page_dir->physaddr);
 	asm volatile("mov %0, %%cr3":: "r"(k_page_dir->physaddr));
 }
 void map_kernel_to_addr_space(page_dir_t* page_dir)

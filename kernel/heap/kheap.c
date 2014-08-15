@@ -1,25 +1,50 @@
-#include <stdint.h>
+#include <klib/stdint.h>
+#include <klib/string.h>
 #include <klib/kassert.h>
 #include <arch/x86/x86.h>
 #include <kernel/multiboot/multiboot.h>
 #include <kernel/heap/kheap.h>
 extern uint32_t k_end;
+uint32_t heap_addr;
 Heap_t KernelHeap;
+Heap_t KernelPageHeap;
+#define K_HEAP_SIZE 0x400000
 /** Original Implementation: http://wiki.osdev.org/User:Pancakes/BitmapHeapImplementation **/
 KHEAPBM kernel_heap;
+KHEAPBM kernel_page_heap;
 void initialise_heap(void)
 {
 	k_heapBMInit(&kernel_heap);
-	uint32_t heap_addr = (PHYSICAL_TO_VIRTUAL(*((uint32_t*)(mboot_info->mods_addr+4))));
-	kassert(heap_addr > (int)&k_end);
-	k_heapBMAddBlock(&kernel_heap, (uintptr_t)heap_addr , 0x200000, 32);
+	heap_addr = (PHYSICAL_TO_VIRTUAL(*((uint32_t*)(mboot_info->mods_addr+4))));
+	kassert(heap_addr > (int)&k_end); 
+	k_heapBMAddBlock(&kernel_heap, (uintptr_t)heap_addr , K_HEAP_SIZE, 32);
 	KernelHeap.Alloc = &kmalloc;
 	KernelHeap.Free = &kfree;
 	KernelHeap.Size = 0x200000;
 }
+void initialise_pd_heap(void)
+{
+	k_heapBMInit(&kernel_page_heap);
+	k_heapBMAddBlock(&kernel_page_heap, (uintptr_t)(heap_addr + K_HEAP_SIZE), K_HEAP_SIZE, 4096);	
+	KernelPageHeap.Alloc = &kpagealloc;
+	KernelPageHeap.Free = &kpagefree;
+	KernelPageHeap.Alloc(1); // Do it to make sure it's aligned
+}
+void* kpagealloc(uint32_t n)
+{
+	void* addr = k_heapBMAlloc(&kernel_page_heap, n);
+	kassert(addr != NULL);
+	return addr;
+}
+void kpagefree(void* ptr)
+{
+	k_heapBMFree(&kernel_page_heap, ptr);
+}
 void* kmalloc(uint32_t n)
 {
-	return k_heapBMAlloc(&kernel_heap, n);
+	void* addr = k_heapBMAlloc(&kernel_heap, n);
+	kassert(addr != NULL);
+	return addr;
 }
 void kfree(void* ptr)
 {

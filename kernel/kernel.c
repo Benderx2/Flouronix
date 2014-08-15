@@ -1,5 +1,5 @@
-#include <stdio.h>
-#include <stddef.h>
+#include <klib/stdio.h>
+#include <klib/stddef.h>
 #include <klib/kassert.h>
 #include <klib/kbool.h>
 #include <klib/string.h>
@@ -11,9 +11,11 @@
 #include <arch/x86/x86.h>
 #include <arch/x86/interrupts.h>
 #include <arch/x86/paging.h>
-#define random 0xc0400000
+// RME Emulator
+#include <arch/x86/emulator/rme.h>
 int kmain(unsigned long magic)
 {
+	// Enable Interrupts
 	CPU_x86.EnableInterrupts();	
 	Console.Clear();
 	Console.WriteLine("kmain(), Magic Number passed by bootloader: %q%x%y, initrd location: %x\n", Console.Green, magic, *(uint32_t*)mboot_info->mods_addr);
@@ -21,11 +23,17 @@ int kmain(unsigned long magic)
 		Console.WriteLine("Sorry, you aren't using a multiboot compatible loader. Please feel free to fuck off\n");
 		CPU_x86.halt();
 	}
+	// Initialise the page frame allocator and map 0x00000000 - 0x000bfffff to 0xc0000000 - 0xc0bfffff
+	uint32_t total_mem = (mboot_info->mem_upper + mboot_info->mem_lower) * 1024;
+	kassert(total_mem >= REQUIRED_MEM_SIZE); // Also check for memory.
+	initialise_paging(total_mem);
+	CPU_x86.MapKernelPage(0x400000, 0xC0400000);
+	CPU_x86.MapKernelPage(0x800000, 0xC0800000);
+	// Intialise the page directory heap
+	initialise_pd_heap();
+	kassert(PHYSICAL_TO_VIRTUAL(mboot_info->mods_count) > 0);
 	/** Initialise ramfs **/
-	initialise_paging((mboot_info->mem_upper + mboot_info->mem_lower) * 1024);
-	kassert(mboot_info->mods_count > 0);
-	uint32_t ramfs_location = PHYSICAL_TO_VIRTUAL((*((uint32_t*)(mboot_info->mods_addr))));
-	//map_page_kernel(ramfs_location);
+	uint32_t ramfs_location = PHYSICAL_TO_VIRTUAL((*((uint32_t*)(PHYSICAL_TO_VIRTUAL(mboot_info->mods_addr)))));
 	initialise_ramfs(ramfs_location);
 	Console.WriteLine("Flouronix 0.1.7. Available Memory (kilobytes) : %d\n", mboot_info->mem_upper + mboot_info->mem_lower);
 	page_dir_t* k_page_dir = (page_dir_t*)(k_page_dir_addr);
@@ -38,19 +46,6 @@ int kmain(unsigned long magic)
 	file->offset = 0; // Start at offset 0
 	Console.WriteLine("file->inode : %d\n", file->inode);
 	KernelVFS.ReadDevice(ramfs, file, buf, 31);
-	CPU_x86.MapKernelPage(0xC00000, 0xC00000);
-	uint8_t* a = (uint8_t*)0xC00000;
-	*a = 'C';
 	Console.WriteLine("Read 'test1.txt' under /%s. Contents : \n%s\n", ramfs->name, buf);
-	char n;
-	while(true)
-	{
-		n = 0;
-		Console.WriteLine(">:");
-		while( n != '\n')
-		{
-			n = Console.ReadChar();
-			Console.WriteChar(n);
-		}
-	}
+	CPU_x86.halt();
 }

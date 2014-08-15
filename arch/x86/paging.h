@@ -16,6 +16,7 @@ typedef struct sPage_dir {
 	uint32_t physaddr;
 } page_dir_t;
 extern uint32_t k_page_dir_addr;
+void print_first_k_entry(void);
 void map_page_kernel(uint32_t vaddr, uint32_t paddr);
 void switch_page_directory(uint32_t page_dir_addr);
 void map_page(uint32_t vaddr, uint32_t paddr, bool is_user, page_dir_t* page_dir);

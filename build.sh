@@ -6,10 +6,13 @@ export KLIB_INCLUDE=./klib/
 export F_INCLUDE=.
 
 set -o verbose
+# Compile RME
+i686-elf-gcc -c arch/x86/emulator/rme.c -o rme.o  -I$KLIB_INCLUDE -I$F_INCLUDE -std=gnu99 
+# Compile libk
 i686-elf-gcc -O0 -c ./klib/string.c -o klib_string.o -I$KLIB_INCLUDE -I$F_INCLUDE -std=gnu99 -fno-builtin
 i686-elf-gcc -O0 -c ./klib/kmath.c -o klib_math.o -I$KLIB_INCLUDE -I$F_INCLUDE -fno-builtin
 i686-elf-gcc -O0 -c ./klib/stdio.c -o klib_stdio.o -I$KLIB_INCLUDE -I$F_INCLUDE -fno-builtin
-i686-elf-ar rcs libk.a klib_string.o klib_math.o klib_stdio.o 
+i686-elf-ar rcs libk.a klib_string.o klib_math.o klib_stdio.o rme.o
 # Compile Kernel
 nasm -f elf ./arch/x86/boot/multiboot/boot.asm -o boot.o
 nasm -f elf ./arch/x86/idt.asm -o idt.o

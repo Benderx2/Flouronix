@@ -97,6 +97,12 @@ void isr_handler(registers_t regs)
 			CPU_x86.StackSegmentFaultException(regs);
 		case GENERAL_PROTECTION_FAULT:
 			CPU_x86.GeneralProtectionException(regs);
+		case INV_TSS:
+			CPU_x86.InvalidTSSException(regs);
+		case SEGMENT_NOT_PRESENT:
+			
+		case DOUBLE_FAULT:	
+			CPU_x86.DoubleFaultException(regs);
 		default:
 			return;
 	}
