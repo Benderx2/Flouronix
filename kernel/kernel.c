@@ -36,10 +36,23 @@ int kmain(unsigned long magic)
 	uint32_t ramfs_location = PHYSICAL_TO_VIRTUAL((*((uint32_t*)(PHYSICAL_TO_VIRTUAL(mboot_info->mods_addr)))));
 	initialise_ramfs(ramfs_location);
 	Console.WriteLine("Flouronix 0.1.7. Available Memory (kilobytes) : %d\n", mboot_info->mem_upper + mboot_info->mem_lower);
-	page_dir_t* k_page_dir = (page_dir_t*)(k_page_dir_addr);
-	Console.WriteLine("Kernel Page Dir Address (Virtual): %x\n", (int)k_page_dir);
-	Console.WriteLine("Kernel Page Dir address (Physical): %x\n", (int)k_page_dir->physaddr);
-	FS_Device* ramfs = KernelVFS.GetDevice("ramfs.0");
+	FS_Device* ramfs = KernelVFS.GetDevice("ramfs.0");	
+	kassert(ramfs != NULL);	
+	Console.WriteLine("List contents of /ramfs.0\n");
+	FS_Unit* ramfs_root = KernelVFS.FopenDevice(ramfs, "/");
+	kassert(ramfs_root != NULL);
+	struct dirent* dirent0;
+	int roots = 0;
+	while((dirent0 = KernelVFS.ReadDirDevice(ramfs, ramfs_root)) != NULL)
+	{
+		if(dirent0->flags == IS_DIRECTORY)
+		{
+			Console.WriteLine("<dir>");
+		}
+		Console.WriteLine(" name: %s inode : %d\n", dirent0->name, dirent0->inode);
+		roots++;
+		ramfs_root->offset = roots;		
+	}
 	FS_Unit* file = KernelVFS.FopenDevice(ramfs, "test1.txt");
 	Console.WriteLine("test1.txt size : %d\n", file->length);
 	char* buf = KernelHeap.Alloc(32);

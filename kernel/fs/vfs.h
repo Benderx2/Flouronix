@@ -26,9 +26,11 @@ typedef struct sFS_unit {
 struct dirent {
 	char name[128];
 	uint32_t inode;
+	uint8_t flags;
 };
 typedef struct sFS_Device {
 	char name[128];
+	void (*shit)(void);
 	int (*donotuse)(FS_Unit*, char*, int);
 	int (*write)(FS_Unit*, char* buf, int bytes);
 	int (*unlink)(FS_Unit*);
