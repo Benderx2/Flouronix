@@ -10,5 +10,5 @@ typedef struct {
 	uint32_t offset;
 	uint32_t length;
 } ramfs_file_header;
-void initialise_ramfs(uint32_t ramfs_location);
+void initialise_ramfs(uint32_t ramfs_location, int user, int grp);
 #endif

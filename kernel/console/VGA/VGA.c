@@ -33,6 +33,7 @@ void VGA_clear(void)
 	{	
 		VGA_BUFFER[i] = 0x0000;	
 	}
+	VGA_X = 0; VGA_Y = 0;
 	VGA_MoveCursor(0, 0);
 }
 static void scroll()

@@ -10,7 +10,7 @@ struct dirent dirent;
 FS_Unit* ramfs_fopen(char* name);
 int ramfs_read(FS_Unit*, char*, int);
 struct dirent *ramfs_readdir(FS_Unit* Unit);
-void initialise_ramfs(uint32_t ramfs_location)
+void initialise_ramfs(uint32_t ramfs_location, int user, int grp)
 {
 	header = (ramfs_header*)ramfs_location;
 	file_headers = (ramfs_file_header*)(ramfs_location + sizeof(ramfs_header));
@@ -21,6 +21,8 @@ void initialise_ramfs(uint32_t ramfs_location)
 	ramfs_dev->fopen = &ramfs_fopen;
 	ramfs_dev->read = &ramfs_read;
 	ramfs_dev->readdir = &ramfs_readdir;
+	ramfs_dev->group_id = grp;
+	ramfs_dev->user_id = user;
 	KernelVFS.MountDevice(ramfs_dev);
 	for(int i = 0; i < header->nFiles; i++)
 	{
@@ -30,6 +32,8 @@ void initialise_ramfs(uint32_t ramfs_location)
 		ramfs_units[i].flags = IS_FILE;
 		ramfs_units[i].length = file_headers[i].length;
 		ramfs_units[i].parent_index = ramfs_dev->id;
+		ramfs_units[i].group_id = grp;
+		ramfs_units[i].user_id = user;
 	}
 	// Add the initrd_root
 	ramfs_units[header->nFiles+1].flags = IS_DIRECTORY;

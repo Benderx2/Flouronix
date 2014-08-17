@@ -34,7 +34,7 @@ int kmain(unsigned long magic)
 	kassert(PHYSICAL_TO_VIRTUAL(mboot_info->mods_count) > 0);
 	/** Initialise ramfs **/
 	uint32_t ramfs_location = PHYSICAL_TO_VIRTUAL((*((uint32_t*)(PHYSICAL_TO_VIRTUAL(mboot_info->mods_addr)))));
-	initialise_ramfs(ramfs_location);
+	initialise_ramfs(ramfs_location, IS_ROOT, IS_ROOT);
 	Console.WriteLine("Flouronix 0.1.7. Available Memory (kilobytes) : %d\n", mboot_info->mem_upper + mboot_info->mem_lower);
 	FS_Device* ramfs = KernelVFS.GetDevice("ramfs.0");	
 	kassert(ramfs != NULL);	

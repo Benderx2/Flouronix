@@ -62,7 +62,6 @@ FS_Device* GetDevice(char* name)
 	FS_Device* NextDevice = first;
 	while(NextDevice != NULL)
 	{
-		Console.WriteLine("lel: %s\n", NextDevice->name);
 		if(!strcmp(name, NextDevice->name))
 		{
 			return NextDevice;

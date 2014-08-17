@@ -5,6 +5,9 @@
 #define IS_FILE 0x0
 #define IS_DIRECTORY 0x01
 #define IS_MOUNTPOINT 0x02
+#define IS_ROOT 0xE5F4
+#define IS_USER 0xE5F5
+#define IS_GUEST 0xE6F6
 typedef struct sFS_unit {
 	char name[128];
 	int group_id;
@@ -39,6 +42,8 @@ typedef struct sFS_Device {
 	int (*read)(FS_Unit*, char*, int);
 	struct dirent* (*readdir)(FS_Unit*);
 	int id;
+	int group_id;
+	int user_id;
 	struct sFS_Device* prev;
 	struct sFS_Device* next;
 } FS_Device;
