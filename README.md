@@ -1,6 +1,6 @@
 Flouronix
 =========
-![alt tag](http://i.imgur.com/LQnc3Gz.png)
+![alt tag](http://i.imgur.com/oSxNT8z.png)
 The Flouronix system is written to run the Flouronix Virtual Machine (https://github.com/Benderx2/FVM) <br>
 It's currently in the babystep stages but much of the early steps have been accomplished. <br>
 The system is written in C (which is a language is choice by most system developers) <br>
