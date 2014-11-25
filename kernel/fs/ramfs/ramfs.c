@@ -29,16 +29,17 @@ void initialise_ramfs(uint32_t ramfs_location, int user, int grp)
 		file_headers[i].offset += ramfs_location;
 		strcpy(ramfs_units[i].name, file_headers[i].name);
 		ramfs_units[i].inode = i;
-		ramfs_units[i].flags = IS_FILE;
+		ramfs_units[i].flags = file_headers[i].flags;
 		ramfs_units[i].length = file_headers[i].length;
 		ramfs_units[i].parent_index = ramfs_dev->id;
 		ramfs_units[i].group_id = grp;
 		ramfs_units[i].user_id = user;
 	}
 	// Add the initrd_root
+	Console.WriteLine("Flags: %x\n", file_headers[64].flags);
 	ramfs_units[header->nFiles+1].flags = IS_DIRECTORY;
 	strcpy(ramfs_units[header->nFiles+1].name, "/");
-	ramfs_units[header->nFiles+1].inode = header->nFiles;
+	ramfs_units[header->nFiles+1].inode = 64;
 	ramfs_units[header->nFiles+1].parent_index = ramfs_dev->id;
 	Console.WriteLine("%qRamFS Initialized%y\n", Console.LightBlue);
 }
@@ -82,6 +83,7 @@ struct dirent *ramfs_readdir(FS_Unit* Unit)
 			strcpy(dirent.name, ramfs_units[Unit->offset].name);
 			dirent.inode = ramfs_units[Unit->offset].inode;
 			dirent.flags = ramfs_units[Unit->offset].flags;
+			dirent.length = ramfs_units[Unit->offset].length;
 			return &dirent;
 		}
 		

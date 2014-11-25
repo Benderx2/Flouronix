@@ -88,6 +88,18 @@ void initialise_paging(int total_mem)
 	CPU_x86.MapPage = &map_page;
 	CPU_x86.MapKerneltoAddressSpace = &map_kernel_to_addr_space;
 	CPU_x86.SwitchAddressSpace = &switch_page_directory;
+	// Start mapping from 0x400000
+	int i = 0x400000;
+	// Memory map -
+	// 0x100000 - 0x400000 == Kernel
+	// 0x400000 - 0x800000 == Heap	
+	// 0x800000 - 0x1800000 == App Space
+	// --- Kernel ---
+	while(i != PAGE_MAX_MAP)
+	{
+		CPU_x86.MapKernelPage(i, PHYSICAL_TO_VIRTUAL(i));
+		i += PAGE_SIZE;
+	}
 }
 void print_first_k_entry(void)
 {

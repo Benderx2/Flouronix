@@ -2,12 +2,12 @@
 #define __VFS_H
 #include <klib/kbool.h>
 #include <stdint.h>
-#define IS_FILE 0x0
-#define IS_DIRECTORY 0x01
-#define IS_MOUNTPOINT 0x02
-#define IS_ROOT 0xE5F4
-#define IS_USER 0xE5F5
-#define IS_GUEST 0xE6F6
+#define IS_FILE 0xE3
+#define IS_DIRECTORY 0xE7
+#define IS_MOUNTPOINT 0xE8
+#define IS_ROOT 0xE5
+#define IS_USER 0xEF
+#define IS_GUEST 0xE6
 typedef struct sFS_unit {
 	char name[128];
 	int group_id;
@@ -30,6 +30,7 @@ struct dirent {
 	char name[128];
 	uint32_t inode;
 	uint8_t flags;
+	int length;
 };
 typedef struct sFS_Device {
 	char name[128];

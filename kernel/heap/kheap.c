@@ -16,6 +16,7 @@ void initialise_heap(void)
 {
 	k_heapBMInit(&kernel_heap);
 	heap_addr = (PHYSICAL_TO_VIRTUAL(*((uint32_t*)(mboot_info->mods_addr+4))));
+	Console.WriteLine("Heap_Addr: %d\n", heap_addr);
 	kassert(heap_addr > (int)&k_end); 
 	k_heapBMAddBlock(&kernel_heap, (uintptr_t)heap_addr , K_HEAP_SIZE, 32);
 	KernelHeap.Alloc = &kmalloc;

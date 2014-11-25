@@ -5,6 +5,7 @@
 #include <arch/x86/x86.h>
 #include <stdint.h>
 #define PAGE_SIZE 0x400000
+#define PAGE_MAX_MAP 0x1C00000
 #define NUMBER_OF_PT_ENTRIES 1024
 #define I86_PAGE_WRITEABLE 0x2
 #define I86_PAGE_PRESENT 0x1

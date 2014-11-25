@@ -8,6 +8,7 @@
 #include <kernel/console/console.h>
 #include <kernel/fs/vfs.h>
 #include <kernel/fs/ramfs/ramfs.h>
+#include <kernel/exec/exec.h>
 #include <arch/x86/x86.h>
 #include <arch/x86/interrupts.h>
 #include <arch/x86/paging.h>
@@ -20,21 +21,22 @@ int kmain(unsigned long magic)
 	Console.Clear();
 	Console.WriteLine("kmain(), Magic Number passed by bootloader: %q%x%y, initrd location: %x\n", Console.Green, magic, *(uint32_t*)mboot_info->mods_addr);
 	if(magic != MULTIBOOT_BOOTLOADER_MAGIC) {
-		Console.WriteLine("Sorry, you aren't using a multiboot compatible loader. Please feel free to fuck off\n");
+		Console.WriteLine("Sorry, you aren't using a multiboot compatible loader. Please feel free to fuck off.\n");
 		CPU_x86.halt();
 	}
 	// Initialise the page frame allocator and map 0x00000000 - 0x000bfffff to 0xc0000000 - 0xc0bfffff
 	uint32_t total_mem = (mboot_info->mem_upper + mboot_info->mem_lower) * 1024;
 	kassert(total_mem >= REQUIRED_MEM_SIZE); // Also check for memory.
 	initialise_paging(total_mem);
-	CPU_x86.MapKernelPage(0x400000, 0xC0400000);
-	CPU_x86.MapKernelPage(0x800000, 0xC0800000);
 	// Intialise the page directory heap
 	initialise_pd_heap();
 	kassert(PHYSICAL_TO_VIRTUAL(mboot_info->mods_count) > 0);
 	/** Initialise ramfs **/
 	uint32_t ramfs_location = PHYSICAL_TO_VIRTUAL((*((uint32_t*)(PHYSICAL_TO_VIRTUAL(mboot_info->mods_addr)))));
-	initialise_ramfs(ramfs_location, IS_ROOT, IS_ROOT);
+	uint32_t ramfs_size = PHYSICAL_TO_VIRTUAL((*((uint32_t*)(PHYSICAL_TO_VIRTUAL((mboot_info->mods_addr)+1)))));
+	Console.WriteLine("Size: %d\n", ramfs_size);
+	memcpy((void*)0xC1800000, (void*)ramfs_location, 0x400000);
+	initialise_ramfs(0xC1800000, IS_ROOT, IS_ROOT);
 	Console.WriteLine("Flouronix 0.1.7. Available Memory (kilobytes) : %d\n", mboot_info->mem_upper + mboot_info->mem_lower);
 	FS_Device* ramfs = KernelVFS.GetDevice("ramfs.0");	
 	kassert(ramfs != NULL);	
@@ -49,16 +51,10 @@ int kmain(unsigned long magic)
 		{
 			Console.WriteLine("<dir>");
 		}
-		Console.WriteLine(" name: %s inode : %d\n", dirent0->name, dirent0->inode);
+		Console.WriteLine(" name: %s inode : %d, length: %d\n", dirent0->name, dirent0->inode, dirent0->length);
 		roots++;
 		ramfs_root->offset = roots;		
 	}
-	FS_Unit* file = KernelVFS.FopenDevice(ramfs, "test1.txt");
-	Console.WriteLine("test1.txt size : %d\n", file->length);
-	char* buf = KernelHeap.Alloc(32);
-	file->offset = 0; // Start at offset 0
-	Console.WriteLine("file->inode : %d\n", file->inode);
-	KernelVFS.ReadDevice(ramfs, file, buf, 31);
-	Console.WriteLine("Read 'test1.txt' under /%s. Contents : \n%s\n", ramfs->name, buf);
+	exec_prog(ramfs, "test.bin");
 	CPU_x86.halt();
 }
